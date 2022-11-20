@@ -31,7 +31,20 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
     def recognize_posture(self, perception):
         posture = 'unknown'
         # YOUR CODE HERE
-
+        Data =[[perception.joint['LHipYawPitch'],
+               perception.joint['RHipYawPitch'],
+               perception.joint['LHipRoll'],
+               perception.joint['RHipRoll'],
+               perception.joint['LHipPitch'],
+               perception.joint['RHipPitch'],
+               perception.joint['LKneePitch'],
+               perception.joint['RKneePitch'],
+               perception.imu[0],
+               perception.imu[1]]]
+        name_classes = listdir('robot_pose_data')
+        clf = pickle.load(open(self.posture_classifier))
+        predicted = clf.predict(Data)
+        posture = name_classes[predicted[0]]
         return posture
 
 if __name__ == '__main__':
