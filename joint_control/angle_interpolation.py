@@ -54,9 +54,8 @@ class AngleInterpolationAgent(PIDAgent):
             zeit = zeiten[i]
             if namen[i] in self.joint_namen:
                 for j in range(len(time)-1):
-                    
-                maxT = zeit[j+1]
-                minT = zeit[j]
+                    maxT = zeit[j+1]
+                    minT = zeit[j]
                 if (minT <= current and current <= maxT):
                     t = (current-minT)/(maxT-minT)
                     p0 =keys[i][j][0]

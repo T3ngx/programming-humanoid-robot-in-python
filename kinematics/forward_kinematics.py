@@ -24,7 +24,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '
 from numpy.matlib import matrix, identity
 
 from recognize_posture import PostureRecognitionAgent
-
+from angle_interpolation import AngleInterpolationAgent
 
 class ForwardKinematicsAgent(PostureRecognitionAgent):
     def __init__(self, simspark_ip='localhost',
@@ -36,9 +36,19 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
         self.transforms = {n: identity(4) for n in self.joint_names}
 
         # chains defines the name of chain and joints of the chain
-        self.chains = {'Head': ['HeadYaw', 'HeadPitch']
+        self.chains = {'Head': ['HeadYaw', 'HeadPitch'],
                        # YOUR CODE HERE
+                       'LArm':['LShoulderPitch','LShoulderRoll','LElbowYaw','LElbowRoll'],
+                       'LLeg':['LHipYawPitch','LHipRoll','LHipPitch','LHipPitch','LAnklePitch','RAnkleRoll'],
+                       'RLeg':['RHipYawPitch','RHipRoll','RHipPitch','RHipPitch','RAnklePitch','LAnkleRoll'],
+                       'RArm':['RShoulderPitch','RShoulderRoll','RElbowYaw','RElbowRoll']
                        }
+        self.joint_length = {'Head':[[0,0,126.5],[0,0,0]],
+                             'LArm':[[0,98,100],[0,0,0],[105,15,0],[0,0,0]],
+                             'RArm':[[0,-98,100],[0,0,0],[105,-15,0],[0,0,0]],
+                             'LLeg':[[0,50,-85],[0,0,0],[0,0,0],[0,0,-100],[0,0,-102.9],[0,0,0]],
+                             'RLeg':[[0,-50,-85],[0,0,0],[0,0,0],[0,0,-100],[0,0,-102.9],[0,0,0]]
+        }
 
     def think(self, perception):
         self.forward_kinematics(perception.joint)
@@ -54,7 +64,27 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
         '''
         T = identity(4)
         # YOUR CODE HERE
-
+        x = math.sin(joint_angle)
+        y = math.cos(joint_angle)
+        
+        if joint_name.endswith("Roll"):
+            T = np.dot(T,matrix([[1,0,0,0],
+                                [0,b,-a,0],
+                                [0,a,b,0],
+                                [0,0,0,1]]))
+        elif joint_name.endswith("Pitch"):
+            T= np.dot(T,matrix([[b,0,a,0],
+                               [0,1,0,0],
+                               [-a,0,b,0],
+                               [0,0,0,1]]))
+        elif joint_name.endswith("Yaw"):
+            T= np.dot(T,matrix([[b,a,0,0],
+                               [-a,b,0,0],
+                               [0,0,1,0],
+                               [0,0,0,1]]))
+        T[0,3] = self.jointLength[joint_name][0]
+        T[1,3] = self.jointLength[joint_name][1]
+        T[2,3] = self.jointLength[joint_name][2]
         return T
 
     def forward_kinematics(self, joints):
@@ -68,7 +98,7 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
                 angle = joints[joint]
                 Tl = self.local_trans(joint, angle)
                 # YOUR CODE HERE
-
+                T= np.dot(T,Tl)
                 self.transforms[joint] = T
 
 if __name__ == '__main__':
