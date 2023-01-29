@@ -100,13 +100,15 @@ class ServerAgent(InverseKinematicsAgent):
         '''get transform with given name
         '''
         # YOUR CODE HERE
+        #set_transforms inverse kinematics
         return self.transform[name]
 
     def set_transform(self, effector_name, transform):
         '''solve the inverse kinematics and control joints use the results
         '''
         # YOUR CODE HERE
-        self.transform
+        #set_transforms inverse kinematics
+        self.transforms[effctor_name] = transform
 
 
 
